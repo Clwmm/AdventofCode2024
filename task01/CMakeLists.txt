@@ -1,1 +1,1 @@
-add_executable(task01 main.cpp)
+add_subdirectory(part01)
