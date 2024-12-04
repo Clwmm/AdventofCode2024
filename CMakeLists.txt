@@ -1,0 +1,26 @@
+cmake_minimum_required(VERSION 3.30)
+project(AdventOfCode2024)
+
+set(CMAKE_CXX_STANDARD 23)
+
+if (CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+    add_compile_options(-Wall -Wextra -pedantic -Werror --verbose)
+elseif (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+    add_compile_options(/W4 /WX)
+endif()
+
+if (CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+    add_compile_options(-O3 -march=native -flto -funroll-loops)
+elseif (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+    add_compile_options(/O2 /GL)
+endif()
+
+if (CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+    set(CMAKE_INTERPROCEDURAL_OPTIMIZATION TRUE)
+elseif (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+    set(CMAKE_INTERPROCEDURAL_OPTIMIZATION ON)
+endif()
+
+add_subdirectory(task01)
+add_subdirectory(task02)
+add_subdirectory(task04)
