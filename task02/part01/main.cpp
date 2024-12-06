@@ -1,122 +1,60 @@
+#include <stdio.h>
 #include <iostream>
-#include <string>
 #include <fstream>
 #include <vector>
-#include <filesystem>
-#include <cstdlib>
+#include <sstream>
+#include <utility>
+#include <cstdint>
+#include <optional>
 
 std::string filename = "input/input";
+using type = int8_t;
 
-std::vector<std::string> getLinesFromFile(const std::string& _filename) {
-    std::ifstream file(_filename);
-    std::vector<std::string> lines;
+std::optional<type> getDifference(const type& a, const type& b) {
+    type result = a - b;
+    if (abs(result) > 3 || result == 0)
+        return std::nullopt;
+    return result;
+}
+
+bool checkMonotonicity(const type& a, const type& b) {
+    if ((a > 0 && b > 0) || (a < 0 && b < 0))
+        return true;
+    return false;
+}
+
+int main() {
+    std::fstream inputFile(filename);
     std::string line;
+    size_t noSafeReports = 0;
+    while (std::getline(inputFile, line)) {
+        std::vector<type> nums;
+        std::stringstream ss(line);
+        std::string num;
+        while(getline(ss, num, ' ')) {
+            nums.push_back((type)(stoi(num)));
+        }
 
-    if (!file.is_open()) {
-        std::cerr << "Failed to open file " << _filename << std::endl;
-        exit(EXIT_FAILURE);
-    }
+        std::optional<type> reference = getDifference(nums[0], nums[1]);
+        if (!reference)
+            continue;
 
-    while (std::getline(file, line)) {
-        lines.push_back(line);
-    }
-
-    file.close();
-
-    return lines;
-}
-
-int getRows(const std::vector<std::string>& rows) {
-    int result = 0;
-    for (const auto& row : rows) {
-
-        int n = row.size() - 3;
-        for (int i = 0; i < n; i++) {
-            std::string p = row.substr(i, 4);
-            if (p == "XMAS" || p == "SAMX") {
-                result++;
+        bool safe = true;
+        for (size_t i = 2; i < nums.size(); ++i) {
+            std::optional<type> diff = getDifference(nums[i - 1], nums[i]);
+            if (!diff) {
+                safe = false;
+                break;
             }
+            if (!checkMonotonicity(*reference, *diff))
+                safe = false;
         }
-    }
-    return result;
-}
-
-std::vector<std::string> createColumns(const std::vector<std::string>& rows) {
-    std::vector<std::string> columns(rows[0].size());
-    for (size_t i = 0; i < rows[0].size(); ++i) {
-        for (size_t j = 0; j < rows.size(); ++j) {
-            columns[i] += rows[j][i];
+        if (safe) {
+            noSafeReports++;
         }
+
     }
-    return columns;
-}
+    inputFile.close();
 
-int getColumns(const std::vector<std::string>& rows) {
-    return getRows(createColumns(rows));
-}
-
-std::vector<std::string> createSE(const std::vector<std::string>& rows) {
-    std::vector<std::string> result = rows;
-
-    for (size_t i = 0; i < rows.size(); ++i) {
-        std::string start_stars(rows.size() - (i + 1), '*');
-        std::string end_stars(i, '*');
-        result[i] = start_stars + result[i] + end_stars;
-    }
-
-    result = createColumns(result);
-
-    if (result.size() > 6) {
-        result.erase(result.begin(), result.begin() + 3);
-        result.erase(result.end() - 3, result.end());
-    }
-
-    return result;
-}
-
-std::vector<std::string> createSW(const std::vector<std::string>& rows) {
-    std::vector<std::string> result = rows;
-
-    for (size_t i = 0; i < rows.size(); ++i) {
-        std::string start_stars(rows.size() - (i + 1), '*');
-        std::string end_stars(i, '*');
-        result[i] = end_stars + result[i] + start_stars;
-    }
-
-    result = createColumns(result);
-
-    if (result.size() > 6) {
-        result.erase(result.begin(), result.begin() + 3);
-        result.erase(result.end() - 3, result.end());
-    }
-
-    for (std::string& str : result) {
-        str.erase(std::remove(str.begin(), str.end(), '*'), str.end());
-    }
-
-    return result;
-}
-
-int getSE(const std::vector<std::string>& rows) {
-    return getRows(createSE(rows));
-}
-
-int getSW(const std::vector<std::string>& rows) {
-    return getRows(createSW(rows));
-}
-
-auto main() -> int {
-    const auto lines = getLinesFromFile(filename);
-
-    const int rows = getRows(lines);
-    const int columns = getColumns(lines);
-    const int se = getSE(lines);
-    const int sw = getSW(lines);
-    const int sum = rows + columns + se + sw;
-
-    std::cout << "Rows:\t\t" << rows << std::endl;
-    std::cout << "Columns:\t" << columns << std::endl;
-    std::cout << "SE:\t\t\t" << se << std::endl;
-    std::cout << "SW:\t\t\t" << sw << std::endl;
-    std::cout << "Sum:\t\t" << sum << std::endl;
+    std::cout << noSafeReports << std::endl;
 }

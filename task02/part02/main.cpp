@@ -1,66 +1,87 @@
+#include <stdio.h>
 #include <iostream>
-#include <string>
 #include <fstream>
 #include <vector>
-#include <filesystem>
-#include <cstdlib>
+#include <sstream>
+#include <cstdint>
+#include <optional>
 
 std::string filename = "input/input";
+using type = int8_t;
+using option = std::optional<type>;
 
-std::vector<std::string> getLinesFromFile(const std::string& _filename) {
-    std::ifstream file(_filename);
-    std::vector<std::string> lines;
-    std::string line;
-
-    if (!file.is_open()) {
-        std::cerr << "Failed to open file " << _filename << std::endl;
-        exit(EXIT_FAILURE);
-    }
-
-    while (std::getline(file, line)) {
-        lines.push_back(line);
-    }
-
-    file.close();
-
-    return lines;
-}
-
-bool checkX(const std::string& first, const std::string& second) {
-    if ((first == "MAS" || first == "SAM") &&
-        (second == "MAS" || second == "SAM")) {
-        return true;
-    }
-    return false;
-}
-
-int run(const std::vector<std::string>& rows) {
-    int result = 0;
-    std::vector<std::vector<char>> charVec;
-
-    for (const std::string& str : rows) {
-        std::vector<char> charVector(str.begin(), str.end());
-        charVec.push_back(charVector);
-    }
-
-    for (size_t i = 1; i < charVec.size() - 1; ++i) {
-        for (size_t j = 1; j < charVec[0].size() - 1; ++j) {
-            std::string first = {rows[i-1][j-1], rows[i][j], rows[i+1][j+1]};
-            std::string second = {rows[i-1][j+1], rows[i][j], rows[i+1][j-1]};
-
-            if (checkX(first, second)) {
-                result++;
-            }
-
-            // std::cout << rows[i-1][j-1] << "*" << rows[i-1][j+1] << std::endl;
-            // std::cout << "*" << rows[i][j] << "*" << std::endl;
-            // std::cout << rows[i+1][j-1] << "*" << rows[i+1][j+1] << std::endl;
-        }
-    }
+option getDifference(const type& a, const type& b) {
+    type result = a - b;
+    if (abs(result) > 3 || result == 0)
+        return std::nullopt;
     return result;
 }
 
-auto main() -> int {
-    const auto lines = getLinesFromFile(filename);
-    std::cout << "Sum:\t" << run(lines) << std::endl;
+bool checkMonotonicity(const type& a, const type& b) {
+    if ((a > 0 && b > 0) || (a < 0 && b < 0))
+        return true;
+    return false;
+}
+
+bool checkNums(const std::vector<type>& nums) {
+    option ref = getDifference(nums[0], nums[1]);
+    if (!ref)
+        return false;
+    for (size_t i = 2; i < nums.size(); ++i) {
+        option diff = getDifference(nums[i -1], nums[i]);
+        if (!diff)
+            return false;
+        if (!checkMonotonicity(*ref, *diff))
+            return false;
+    }
+    return true;
+}
+
+class Nums {
+    std::vector<type> nums;
+    bool safe = false;
+public:
+    Nums(std::vector<type>& nums)
+        : nums(nums) {
+        safe = checkNums(nums);
+    };
+
+    [[nodiscard]] bool areSafe() const {
+        return safe;
+    }
+
+    bool removeAndCheckAll() {
+        for (size_t i = 0; i < nums.size(); ++i) {
+            std::vector<type> vec = nums;
+            vec.erase(vec.begin() + i);
+            if (checkNums(vec))
+                return true;
+        }
+        return false;
+    }
+
+
+};
+
+int main() {
+    std::fstream inputFile(filename);
+    std::string line;
+    size_t noSafeReports = 0;
+    while (std::getline(inputFile, line)) {
+        std::vector<type> nums;
+        std::stringstream ss(line);
+        std::string num;
+        while(getline(ss, num, ' ')) {
+            nums.push_back((type)(stoi(num)));
+        }
+        Nums nums1(nums);
+        if (nums1.areSafe())
+            noSafeReports++;
+        else
+            if (nums1.removeAndCheckAll())
+                noSafeReports++;
+    }
+    inputFile.close();
+
+    std::cout << noSafeReports << std::endl;
 }
