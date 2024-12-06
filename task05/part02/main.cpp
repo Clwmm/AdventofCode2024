@@ -128,7 +128,7 @@ int main() {
     using type = uint8_t;
     BinaryTree<type> bt;
     HashMap<type, type> map;
-    std::vector<std::vector<type>> updateLines;
+    uint64_t result = 0;
 
     std::fstream inputFile(filename);
     std::string line;
@@ -145,34 +145,30 @@ int main() {
             while(getline(ss, num, ',')) {
                 nums.push_back((type)(stoi(num)));
             }
-            updateLines.push_back(nums);
+
+            bool badLine = false;
+            for (int i = (int)nums.size() - 1; i >= 0; --i) {
+                for (int j = i - 1; j >= 0; --j) {
+                    const auto& vec = map.get(nums[i]);
+                    if (isInVector(vec, nums[j])) {
+                        badLine = true;
+                        break;
+                    }
+                }
+                if (badLine)
+                    break;
+            }
+            if (badLine) {
+                for (auto x : nums) {
+                    bt.insert(x, map);
+                }
+                bt.inorder();
+                result += bt.getMiddleElement();
+                bt.clear();
+            }
         }
     }
     inputFile.close();
-
-    uint64_t result = 0;
-    for (auto _line : updateLines) {
-        bool badLine = false;
-        for (int i = (int)_line.size() - 1; i >= 0; --i) {
-            for (int j = i - 1; j >= 0; --j) {
-                const auto& vec = map.get(_line[i]);
-                if (isInVector(vec, _line[j])) {
-                    badLine = true;
-                    break;
-                }
-            }
-            if (badLine)
-                break;
-        }
-        if (badLine) {
-            for (auto x : _line) {
-                bt.insert(x, map);
-            }
-            bt.inorder();
-            result += bt.getMiddleElement();
-            bt.clear();
-        }
-    }
 
     std::cout << result << std::endl;
 }

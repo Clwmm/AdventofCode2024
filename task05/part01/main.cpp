@@ -43,6 +43,7 @@ int main() {
     using type = uint8_t;
     HashMap<type, type> map;
     std::vector<std::vector<type>> updateLines;
+    uint64_t result = 0;
 
     std::fstream inputFile(filename);
     std::string line;
@@ -60,29 +61,26 @@ int main() {
                 nums.push_back((type)(stoi(num)));
             }
             updateLines.push_back(nums);
+
+            type middleNumber = nums[nums.size() / 2];
+            bool badLine = false;
+            for (int i = (int)nums.size() - 1; i >= 0; --i) {
+                for (int j = i - 1; j >= 0; --j) {
+                    auto vec = map.get(nums[i]);
+                    if (isInVector(vec, nums[j])) {
+                        badLine = true;
+                        break;
+                    }
+                }
+                if (badLine)
+                    break;
+            }
+            if (!badLine) {
+                result += middleNumber;
+            }
         }
     }
     inputFile.close();
-
-    uint64_t result = 0;
-    for (auto _line : updateLines) {
-        type middleNumber = _line[_line.size() / 2];
-        bool badLine = false;
-        for (int i = (int)_line.size() - 1; i >= 0; --i) {
-            for (int j = i - 1; j >= 0; --j) {
-                auto vec = map.get(_line[i]);
-                if (isInVector(vec, _line[j])) {
-                    badLine = true;
-                    break;
-                }
-            }
-            if (badLine)
-                break;
-        }
-        if (!badLine) {
-            result += middleNumber;
-        }
-    }
 
     std::cout << result << std::endl;
 }
