@@ -1,6 +1,12 @@
-SET(EXEC_NAME task06_p02_mt)
+SET(EXEC_NAME task07_p02_mt)
+
+include_directories(/usr/include) # Adjust path as found
+link_directories(/usr/lib/x86_64-linux-gnu) # Adjust path as found
 
 add_executable(${EXEC_NAME} main.cpp)
+
+
+target_link_libraries(${EXEC_NAME} gmp gmpxx)
 
 add_custom_command(
         TARGET ${EXEC_NAME} POST_BUILD
