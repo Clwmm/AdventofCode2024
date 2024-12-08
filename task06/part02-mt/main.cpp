@@ -276,7 +276,7 @@ auto main() -> int {
     auto visitedTiles = guard.getVisitedTiles();
     std::cout << "Visited tiles: " << visitedTiles.size() << std::endl;
 
-    size_t num_threads = 7;
+    size_t num_threads = visitedTiles.size();
     auto split_parts = splitSet(visitedTiles, num_threads);
 
     std::vector<std::future<size_t>> futures;
@@ -290,7 +290,6 @@ auto main() -> int {
     for (size_t i = 0; i < num_threads; ++i) {
         size_t result = futures[i].get();
         num_of_loops += result;
-        std::cout << "Result from Thread " << i << ": " << result << std::endl;
     }
 
 
