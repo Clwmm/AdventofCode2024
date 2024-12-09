@@ -276,7 +276,7 @@ auto main() -> int {
     auto visitedTiles = guard.getVisitedTiles();
     std::cout << "Visited tiles: " << visitedTiles.size() << std::endl;
 
-    size_t num_threads = visitedTiles.size();
+    size_t num_threads = std::thread::hardware_concurrency();
     auto split_parts = splitSet(visitedTiles, num_threads);
 
     std::vector<std::future<size_t>> futures;
