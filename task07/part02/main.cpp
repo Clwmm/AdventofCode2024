@@ -6,6 +6,7 @@
 #include <queue>
 
 //  Install GMP library
+// sudo apt-get install libgmp-dev
 #include <gmp.h>
 #include <gmpxx.h>
 
