@@ -65,8 +65,9 @@ def create_task_folder(directory, task_num):
     main_cpp_part2_path = os.path.join(part2_path, "main.cpp")
 
     if os.path.exists(sample_cpp_path):
-        with open(sample_cpp_path, "r") as sample_cpp_file, open(main_cpp_part1_path, "w") as main_cpp_part1_file, open(main_cpp_part2_path, "w") as main_cpp_part2_file:
+        with open(sample_cpp_path, "r") as sample_cpp_file, open(main_cpp_part1_path, "w") as main_cpp_part1_file:
             main_cpp_part1_file.write(sample_cpp_file.read())
+        with open(sample_cpp_path, "r") as sample_cpp_file, open(main_cpp_part2_path, "w") as main_cpp_part2_file:
             main_cpp_part2_file.write(sample_cpp_file.read())
     else:
         raise FileNotFoundError(f"The sample file '{sample_cpp_path}' does not exist.")
